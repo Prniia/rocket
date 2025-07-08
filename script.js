@@ -4,46 +4,42 @@ let startCounter = startBox.querySelector('#start-counter');
 let errorElement = document.querySelector('#error-message');
 let timerCircle = document.querySelector('.c100');
 let timerNum = document.querySelector('.c100 > span');
-let loadingMessage = document.querySelector('.message .loading');
-let successMessage = document.querySelector('.message .success');
+let lastPercent = 'p100';
+let originalSeconds, seconds, timerId;
+
 
 startCounter.addEventListener('click' , function(e) {
-    let seconds = parseInt(inputCounter.value)
+    seconds = parseInt(inputCounter.value)
 
-    if(isNaN(seconds)) {
-        return toggletErrorMessage({ show : true, message : 'زمان را بدرستی وارد کنید' });
-    }
+    if(isNaN(seconds)) return toggletErrorMessage({ show : true, message : 'زمان را بدرستی وارد کنید' });
+
+
 
     toggletErrorMessage({ show : false});
-    timerCircle.style.display = 'block';
-    timerNum.textContent = seconds;
-    loadingMessage.style.display = 'block';
-    successMessage.style.display = 'none';
+    toggleStartBox({show : false});
+    toggleLoadingMessage({show : true});
+    toggleTimer({show : true, seconds});
 
 
-    let originalSeconds = seconds;
-    let lastPercent = 'p100';
-    let timerId = setInterval(() => {
+    originalSeconds = seconds;
+    timerId = setInterval( startTimer, 1000);
+})
+
+    let startTimer = () => {
         if (lastPercent) timerCircle.classList.remove(lastPercent);
 
-        if(seconds <= 1) {
+            if(seconds <= 0) {
             clearInterval(timerId);
-            startBox.classList.add('active');
-            timerCircle.style.display = 'none';
-            loadingMessage.style.display = 'none';
-            successMessage.style.display = 'block';
-            inputCounter.value = ''
+            toggleStartBox({ show : true })
+            toggleTimer({ show : false })
+            toggleLoadingMessage({ show : false })
             return;
         }
-
-
-        seconds -= 1;
-        timerNum.textContent = seconds;
-        let percent = lastPercent = `p${Math.abs(Math.floor(((originalSeconds - seconds) / originalSeconds) * 100) - 100)}`;
-        timerCircle.classList.add(percent);
-    }, 1000);
-
-})
+            seconds -= 1;
+            timerNum.textContent = seconds;
+            let percent = lastPercent = `p${Math.abs(Math.floor(((originalSeconds - seconds) / originalSeconds) * 100) - 100)}`;
+            timerCircle.classList.add(percent);
+}
 
 let toggletErrorMessage = ({ show, message }) => {
     if(show){
@@ -52,5 +48,38 @@ let toggletErrorMessage = ({ show, message }) => {
     }
     else{
         errorElement.classList.remove('active');
+    }
+}
+
+let toggleStartBox = ({show}) => {
+    if(show){
+        startBox.classList.add('active');
+        inputCounter.value = ''
+    }
+    else {
+        startBox.classList.remove('active');
+    }
+}
+
+let toggleTimer = ({show, seconds}) => {
+    if(show){
+        timerCircle.style.display = 'block';
+        timerNum.textContent = seconds
+    }
+    else{
+        timerCircle.style.display = 'none';
+    }
+}
+
+let toggleLoadingMessage = ({ show }) => {
+    let loadingMessage = document.querySelector('.message .loading');
+    let successMessage = document.querySelector('.message .success');
+    if(show){
+        loadingMessage.style.display = 'block';
+        successMessage.style.display = 'none';
+    }
+    else{
+        loadingMessage.style.display = 'none';
+        successMessage.style.display = 'block';
     }
 }
